@@ -1,10 +1,12 @@
 use sysinfo::{System, Components, Disks, Networks};
+use colored::Colorize;
+
 pub fn sys_information(){
-    println!("=> Global system information:");
-    println!("Operating System: {}", System::name().unwrap_or_else(|| "Desconocido".to_string()));
-    println!("OS Version: {}", System::os_version().unwrap_or_else(|| "Desconocido".to_string()));
-    println!("Kernel Version: {}", System::kernel_version().unwrap_or_else(|| "Desconocido".to_string()));
-    println!("Host Name: {}", System::host_name().unwrap_or_else(|| "Desconocido".to_string()));
+    println!("{}","=> Global system information".bold().underline());
+    println!("{} {}","Operating System:".truecolor(64, 64, 64), System::name().unwrap_or_else(|| "Desconocido".to_string()));
+    println!("{} {}","OS Version:".truecolor(64, 64, 64), System::os_version().unwrap_or_else(|| "Desconocido".to_string()));
+    println!("{} {}","Kernel Version:".truecolor(64, 64, 64), System::kernel_version().unwrap_or_else(|| "Desconocido".to_string()));
+    println!("{} {}","Host Name:".truecolor(64, 64, 64), System::host_name().unwrap_or_else(|| "Desconocido".to_string()));
 }
 
 pub fn sys_components() {
@@ -15,35 +17,38 @@ pub fn sys_components() {
 }
 
 pub fn ram_memory(sys: &System){
-    println!("=> RAM memory information");
-    println!("Total RAM: {} B", sys.total_memory());
-    println!("Used RAM: {} B", sys.used_memory());
-    println!("Free RAM: {} B", sys.free_memory());
-    println!("Free RAM: {} B", sys.available_memory());
+    println!("{}","=> RAM memory information".bold().underline());
+    println!("{}", format!("Total RAM: {} B", sys.total_memory()).truecolor(64, 64, 64));
+    println!("{}", format!("Used RAM: {} B", sys.used_memory()).truecolor(64, 64, 64));
+    println!("{}", format!("Free RAM: {} B", sys.free_memory()).truecolor(64, 64, 64));
+    println!("{}", format!("Available RAM: {} B", sys.available_memory()).truecolor(64, 64, 64));
 }
 
 pub fn swap_memory(sys: &System){
-    println!("=> SWAP memory information");
-    println!("Total SWAP {} B", sys.total_swap());
-    println!("Used SWAP {} B", sys.used_swap());
-    println!("Free SWAP {} B", sys.free_swap());
+    println!("{}","=> SWAP memory information".bold().underline());
+    println!("{}", format!("Total SWAP {} B", sys.total_swap()).truecolor(64, 64, 64));
+    println!("{}", format!("Used SWAP {} B", sys.used_swap()).truecolor(64, 64, 64));
+    println!("{}", format!("Free SWAP {} B", sys.free_swap()).truecolor(64, 64, 64));
 }
 
 pub fn cpu(sys: &System){
-    println!("=> CPUs information");
-    println!("Global CPU usage: {}", sys.global_cpu_usage());
-    println!("Number CPUs: {}", sys.cpus().len());
+    let cpu_count = sys.cpus().len(); 
+
+    println!("{}","=> CPUs information".bold().underline());
+    println!("{} {}", "Global CPU usage:".truecolor(64, 64, 64), format!("{:.2}%", sys.global_cpu_usage()).truecolor(64, 64, 64));
+    println!("{} {}", "Number of CPUs:".truecolor(64, 64, 64), cpu_count.to_string().truecolor(64, 64, 64));
+
     for cpu in sys.cpus() {
-        println!("CPU Name: {}", cpu.name());
-        println!("CPU usage: {}%", cpu.cpu_usage());
-        println!("CPU frequency: {} MHz", cpu.frequency());
+        println!("{} {}","CPU Name:".truecolor(64, 64, 64), cpu.name());
+        println!("{}", format!("CPU usage: {}%", cpu.cpu_usage()).truecolor(64, 64, 64));
+        println!("{}", format!("CPU frequency: {} MHz", cpu.frequency()).truecolor(64, 64, 64));
     }
 }
 
 pub fn processes(sys: &System){
     for (pid, process) in sys.processes() {
-        println!("=> Processes information");
-        println!("[{pid}] {:?} {:?}", process.name(), process.disk_usage());
+        println!("{}","=> Processes information".bold().underline());
+        println!("{}", format!("[{pid}] {:?} {:?}", process.name(), process.disk_usage()).truecolor(64, 64, 64));
     }
 }
 
@@ -55,29 +60,24 @@ pub fn disks(){
             Some(name) if !name.is_empty() => name,
             _ => "Desconocido",
         };
-        println!("=> Disks information");
-        println!("Disk Name: {}", disk_name);
-        println!("Type:{}", disk.kind());
-        println!("File System: {}", disk.file_system().to_string_lossy());
-        println!("Removable?: {}", disk.is_removable());
-        println!("ReadOnly?: {}", disk.is_read_only());
-        println!("Total size: {} B", disk.total_space());
-        println!("Available size: {} B", disk.available_space());
+        println!("{}","=> Disks information".bold().underline());
+        println!("{} {}","Disk Name:".truecolor(64, 64, 64), disk_name);
+        println!("{} {}","Type:".truecolor(64, 64, 64), disk.kind());
+        println!("{} {}","File System:".truecolor(64, 64, 64), disk.file_system().to_string_lossy());
+        println!("{} {}","Removable?:".truecolor(64, 64, 64), disk.is_removable());
+        println!("{} {}","ReadOnly?:".truecolor(64, 64, 64), disk.is_read_only());
+        println!("{}", format!("Total size: {} B", disk.total_space()).truecolor(64, 64, 64));
+        println!("{}", format!("Available size: {} B", disk.available_space()).truecolor(64, 64, 64));
     }
 }
 
 pub fn networks() {
     let networks = Networks::new_with_refreshed_list();
     for (interface_name, data) in &networks {
-        println!("=> Networks information");
-        println!(
-            "{interface_name}: {} B (down) / {} B (up)",
-            data.total_received(),
-            data.total_transmitted(),
-        );
+        println!("{}","=> Networks information".bold().underline());
+        println!("{}", format!("{interface_name}: {} B (down) / {} B (up)", data.total_received(), data.total_transmitted()).truecolor(64, 64, 64));
     }
 }
 
-// colores
 // en los loops process() y cpu() poner un sistema donde guarde esa info aparte
 // seguir pasos en readme.md
