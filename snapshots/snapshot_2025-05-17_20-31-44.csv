@@ -1,0 +1,2 @@
+timestamp,Operating System,OS Version,Total RAM,Used RAM,Free RAM,Available RAM,Total SWAP,Used SWAP,Free SWAP,Global CPU Usage,Number of CPUs,Number of Processes,Disks,Network Usage
+2025-05-17_20-31-44,Windows,11 (26100),16507002880,7343136768,9163866112,9163866112,16642998272,0,16642998272,6.64,16,170,[{"available":257302573056,"filesystem":"NTFS","name":"","readonly":false,"removable":false,"total":499263348736,"type":"SSD"}],[{"down":13183795,"name":"Ethernet","up":5561158}]
