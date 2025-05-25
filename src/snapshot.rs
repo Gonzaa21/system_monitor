@@ -1,12 +1,16 @@
 use crate::monitor;
 use sysinfo::System;
+use std::fs::OpenOptions;
 use std::fs::File;
+use std::path::Path;
 use std::io::{Write, BufWriter};
+use std::fs;
 
 pub fn snapshot_system(sys: &mut System, timestamp: &str, selected: &Vec<String>) {
     sys.refresh_all();
 
     // create csv file
+    std::fs::create_dir_all("snapshots").unwrap();
     let filename = format!("snapshots/snapshot_{}.csv", timestamp);
     let file = File::create(&filename).unwrap();
     let mut writer = BufWriter::new(file);
@@ -62,4 +66,21 @@ pub fn snapshot_system(sys: &mut System, timestamp: &str, selected: &Vec<String>
     // add writer and headers in csv file
     writeln!(writer, "{}", headers.join(","))        .unwrap();
     writeln!(writer, "{}", values.join(","))         .unwrap();
+    writer.flush().unwrap();
+
+    // discord bot paths
+    let dest_dir = "C:/Users/Usuario/Downloads/sysEye/snapshots";
+    std::fs::create_dir_all(dest_dir).unwrap();
+    let dest_path = format!("{}/snapshot_{}.csv", dest_dir, timestamp);
+    let latest_path = format!("{}/latest.txt", dest_dir);
+
+    // verify if file exists
+    if Path::new(&dest_path).exists() {
+        fs::remove_file(&dest_path).unwrap();
+    }
+
+    fs::copy(&filename, &dest_path).unwrap(); // copy to discord bot
+    // send snapshot name to latest.txt
+    let mut latest_file = OpenOptions::new().write(true).create(true).truncate(true).open(&latest_path).unwrap();
+    writeln!(latest_file, "snapshot_{}.csv", timestamp).unwrap();
 }
