@@ -40,9 +40,32 @@ pub fn snapshot_system(sys: &mut System, timestamp: &str, selected: &Vec<String>
                 values.extend([total, used, free].iter().map(|v| v.to_string()));
             }
             "Disk" => {
-                let disks = monitor::disks_value();
-                headers.push("Disks".to_string());
-                values.push(disks);
+                let disks_json = monitor::disks_value();
+                let parsed_disks: Vec<serde_json::Value> = serde_json::from_str(&disks_json).unwrap_or(vec![]);
+
+                // For each disk, add columns
+                for (_i, disk) in parsed_disks.iter().enumerate() {
+                    let prefix = format!("Disk");
+                    headers.extend([
+                        format!("{} Name", prefix),
+                        format!("{} Type", prefix),
+                        format!("{} FileSystem", prefix),
+                        format!("{} Removable", prefix),
+                        format!("{} ReadOnly", prefix),
+                        format!("{} Total Space", prefix),
+                        format!("{} Available Space", prefix),
+                    ]);
+                    
+                    values.extend([
+                        disk["name"].to_string().trim_matches('"').to_string(),
+                        disk["type"].to_string().trim_matches('"').to_string(),
+                        disk["filesystem"].to_string().trim_matches('"').to_string(),
+                        disk["removable"].to_string(),
+                        disk["readonly"].to_string(),
+                        disk["total"].to_string(),
+                        disk["available"].to_string(),
+                    ]);
+                }
             }
             "CPU" => {
                 let (usage, cores) = monitor::cpu_values(sys);
@@ -55,9 +78,23 @@ pub fn snapshot_system(sys: &mut System, timestamp: &str, selected: &Vec<String>
                 values.push(count.to_string());
             }
             "Network" => {
-                let data = monitor::networks_value();
-                headers.push("Network Usage".to_string());
-                values.push(data);
+                let network_json = monitor::networks_value();
+                let parsed_networks: Vec<serde_json::Value> = serde_json::from_str(&network_json).unwrap_or(vec![]);
+
+                for (_i, net) in parsed_networks.iter().enumerate() {
+                    let prefix = format!("Net");
+                    headers.extend([
+                        format!("{} Name", prefix),
+                        format!("{} Down", prefix),
+                        format!("{} Up", prefix),
+                    ]);
+                    
+                    values.extend([
+                        net["name"].to_string().trim_matches('"').to_string(),
+                        net["down"].to_string(),
+                        net["up"].to_string(),
+                    ]);
+                }
             }
             _ => {}
         }
